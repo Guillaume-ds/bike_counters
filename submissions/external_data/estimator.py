@@ -41,24 +41,24 @@ def _merge_external_data(X):
 
 def get_estimator():
     date_encoder = FunctionTransformer(_encode_dates)
-    date_cols = ["year", "month", "day", "weekday", "hour"]
-
-    categorical_encoder = OneHotEncoder(handle_unknown="ignore")
-    categorical_cols = ["counter_name", "site_name"]
-
-    preprocessor = ColumnTransformer(
-        [
-            ("date", OneHotEncoder(handle_unknown="ignore"), date_cols),
-            ("cat", categorical_encoder, categorical_cols),
-        ]
-    )
-    regressor = Ridge()
-
+    holidays_columns = ["isholiday"]
+    time_columns = ["month", "year","weekday", "hour"]
+    place_columns = ["site_name"]
+    weather_columns = ["u", "t", "ff"]
+    phenomenon_columns = ["phenspe2"]
+ 
+    preprocessor = ColumnTransformer([
+            ('time', "passthrough", time_columns),
+            ('place', OneHotEncoder(categories='auto',handle_unknown='ignore'), place_columns),
+            ('weather', "passthrough", weather_columns),
+        ], remainder="drop")
+ 
+    regressor = CatBoostRegressor()
+ 
     pipe = make_pipeline(
         FunctionTransformer(_merge_external_data, validate=False),
-        date_encoder,
-        preprocessor,
-        regressor,
-    )
-
+        date_encoder, 
+        preprocessor, 
+        regressor)
+ 
     return pipe
