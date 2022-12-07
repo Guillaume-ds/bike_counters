@@ -42,20 +42,26 @@ def get_estimator():
     time_columns = ["month", "year", "weekday", "hour"]
     place_columns = ["site_name"]
     weather_columns = ["u", "t", "ff"]
- 
+
     preprocessor = ColumnTransformer(
         [
-            ('time', "passthrough", time_columns),
-            ('place', OneHotEncoder(categories='auto',handle_unknown='ignore'), place_columns),
-            ('weather', "passthrough", weather_columns),
-        ], remainder="drop"
+            ("time", "passthrough", time_columns),
+            (
+                "place",
+                OneHotEncoder(categories="auto", handle_unknown="ignore"),
+                place_columns,
+            ),
+            ("weather", "passthrough", weather_columns),
+        ],
+        remainder="drop",
     )
     regressor = CatBoostRegressor()
- 
+
     pipe = make_pipeline(
         FunctionTransformer(_merge_external_data, validate=False),
-        date_encoder, 
-        preprocessor, 
-        regressor)
- 
+        date_encoder,
+        preprocessor,
+        regressor,
+    )
+
     return pipe
